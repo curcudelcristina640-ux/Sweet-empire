@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffd8e8">
+<title>Sweet Empire – Cute Edition</title>
+<style>
+:root{--pink:#ffb8d2;--deep:#a94f7d;--cream:#fff8ef;--lav:#e8d9ff;--mint:#d9f5e8;--gold:#ffe49b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#713d5a;background:linear-gradient(145deg,#fff0f6,#f4eaff 55%,#e5fff4);min-height:100vh}
+header{text-align:center;padding:22px 12px 12px}h1{margin:0;color:#b84f83;font-size:clamp(25px,5vw,39px)}header p{margin:6px 0}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px}.stat{background:#ffffffc9;border:2px solid #ffd0e2;border-radius:18px;padding:9px 15px;min-width:120px;text-align:center;box-shadow:0 4px 12px #c77ba322}.stat b{display:block;font-size:20px;color:#a84878}
+main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:#ffffffd9;border:2px solid #ffd0e2;border-radius:23px;padding:16px;box-shadow:0 8px 20px #b66b9020}.wide{grid-column:1/-1}h2{margin:0 0 12px;color:#a94f7d;font-size:20px}
+.scene{background:linear-gradient(#e7d8ff,#fff0f7 58%,#d9f5e8 59%);border-radius:19px;padding:16px;text-align:center;min-height:190px;position:relative;overflow:hidden}
+.castle{font-size:55px}.garden{font-size:27px;margin:4px}.cats{display:flex;justify-content:center;gap:28px;font-size:48px;margin:5px}
+.cookie{font-size:100px;border:0;background:transparent;cursor:pointer;filter:drop-shadow(0 5px 3px #9c684455);transition:transform .1s}.cookie:active{transform:scale(.88) rotate(-8deg)}
+.hint{font-size:13px;color:#986783}.shopgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.buy{border:2px solid #ffd0e2;border-radius:15px;padding:11px;background:linear-gradient(135deg,#fff0f6,#f3eaff);color:#793e60;text-align:left;cursor:pointer;font:inherit}
+.buy b{display:block}.buy small{display:block;margin-top:3px}.buy:disabled{opacity:.48;cursor:not-allowed}
+.pet{display:inline-flex;align-items:center;gap:8px;background:#fff1f7;border:1px solid #ffc9df;border-radius:14px;padding:8px 11px;margin:4px}
+button:focus-visible{outline:3px solid #a94f7d;outline-offset:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.action{border:0;border-radius:14px;padding:10px 14px;background:#f7c5dc;color:#793e60;font-weight:700;cursor:pointer}
+footer{text-align:center;padding:14px;font-size:12px;color:#986783}
+@media(max-width:650px){main{grid-template-columns:1fr}.wide{grid-column:auto}.shopgrid{grid-template-columns:1fr 1fr}.stat{min-width:100px}}
+</style>
+</head>
+<body>
+<header><h1>🍓 Sweet Empire – Cute Edition 🍓</h1><p>Construiește-ți propriul imperiu dulce!</p></header>
+<section class="stats">
+ <div class="stat">🍪 Fursecuri<b id="cookies">0</b></div>
+ <div class="stat">✨ Pe secundă<b id="cps">0</b></div>
+ <div class="stat">🏆 Nivel<b id="level">1</b></div>
+</section>
+<main>
+ <section class="panel">
+  <h2>🏰 Castelul tău roz</h2>
+  <div class="scene"><div class="castle">🏰</div><div class="garden">🌷 🌸 🍭 🌼 🍬 🌷</div><div class="cats"><span title="Pisicuța Mimi">🐱</span><span title="Pisicuța Luna">🐈</span></div><p class="hint">Mimi și Luna păzesc grădina de bomboane!</p></div>
+ </section>
+ <section class="panel" style="text-align:center">
+  <h2>🍪 Fă fursecuri!</h2>
+  <button class="cookie" id="cookie" aria-label="Apasă pentru fursecuri">🍪</button>
+  <p><b>+<span id="clickPower">1</span> fursecuri / apăsare</b></p>
+  <p class="hint">Apasă pe fursec ca să strângi avere dulce.</p>
+ </section>
+ <section class="panel wide">
+  <h2>🛍️ Magazin de upgrade-uri</h2><div class="shopgrid" id="shop"></div>
+ </section>
+ <section class="panel wide">
+  <h2>🐾 Animăluțele tale</h2>
+  <div id="pets"><span class="pet">🐱 Mimi – prietena ta</span><span class="pet">🐈 Luna – protectoarea castelului</span></div>
+  <p class="hint">Cumpără upgrade-uri pentru a debloca mai multe ajutoare!</p>
+ </section>
+ <section class="panel wide">
+  <h2>💗 Progresul imperiului</h2>
+  <p>Fursecuri câștigate în total: <b id="total">0</b></p>
+  <div class="actions"><button class="action" id="save">💾 Salvează acum</button><button class="action" id="reset">↻ Resetează jocul</button></div>
+  <p class="hint" id="status">Salvarea automată este activă pe acest dispozitiv.</p>
+ </section>
+</main>
+<footer>Sweet Empire – Cute Edition · Joc gratuit pentru browser</footer>
+<script>
+const defaults={cookies:0,total:0,power:1,cps:0,level:1,owned:{},prices:{},pets:[]};
+const items=[
+ {id:'click',name:'✨ Mănușă magică',desc:'+1 la fiecare apăsare',price:30,kind:'click',icon:'🪄'},
+ {id:'kitten',name:'🐱 Pisicuță ajutătoare',desc:'+1 fursec / secundă',price:60,kind:'auto',amount:1,icon:'🐱'},
+ {id:'oven',name:'🧁 Cuptor roz',desc:'+5 fursecuri / secundă',price:250,kind:'auto',amount:5,icon:'🧁'},
+ {id:'garden',name:'🌷 Grădina de bomboane',desc:'+12 fursecuri / secundă',price:700,kind:'auto',amount:12,icon:'🍬'},
+ {id:'bakery',name:'🏡 Brutăria castelului',desc:'+30 fursecuri / secundă',price:1800,kind:'auto',amount:30,icon:'🏡'},
+ {id:'fairy',name:'🧚 Zână a zahărului',desc:'+75 fursecuri / secundă',price:5000,kind:'auto',amount:75,icon:'🧚'}
+];
+let s={...defaults,owned:{},prices:{},pets:[]};
+function fmt(n){return Math.floor(n).toLocaleString('ro-RO')}
+function price(it){return s.prices[it.id]||it.price}
+function render(){
+ document.getElementById('cookies').textContent=fmt(s.cookies);
+ document.getElementById('cps').textContent=fmt(s.cps);
+ document.getElementById('level').textContent=s.level;
+ document.getElementById('clickPower').textContent=s.power;
+ document.getElementById('total').textContent=fmt(s.total);
+ document.getElementById('shop').innerHTML=items.map(it=>`<button class="buy" data-id="${it.id}" ${s.cookies<price(it)?'disabled':''}><b>${it.icon} ${it.name}</b><small>${it.desc}</small><small>💗 ${fmt(price(it))} fursecuri · Deținute: ${s.owned[it.id]||0}</small></button>`).join('');
+ document.querySelectorAll('.buy').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.id)));
+ const pets=['kitten','fairy'].filter(id=>(s.owned[id]||0)>0);
+ document.getElementById('pets').innerHTML='<span class="pet">🐱 Mimi – prietena ta</span><span class="pet">🐈 Luna – protectoarea castelului</span>'+pets.map(id=>id==='kitten'?'<span class="pet">🐾 Pisicuță ajutătoare ×'+s.owned[id]+'</span>':'<span class="pet">🧚 Zână a zahărului ×'+s.owned[id]+'</span>').join('');
+}
+function add(n){s.cookies+=n;s.total+=n;const lv=Math.floor(s.total/500)+1;if(lv>s.level)s.level=lv;render()}
+function buy(id){const it=items.find(x=>x.id===id),p=price(it);if(s.cookies<p)return;s.cookies-=p;s.owned[id]=(s.owned[id]||0)+1;if(it.kind==='click')s.power++;else s.cps+=it.amount;s.prices[id]=Math.ceil(p*1.45);render();save(false)}
+document.getElementById('cookie').addEventListener('click',()=>add(s.power));
+function save(show=true){localStorage.setItem('sweetEmpireCute2026',JSON.stringify(s));if(show)document.getElementById('status').textContent='💖 Progres salvat cu succes!'}
+function load(){try{const d=JSON.parse(localStorage.getItem('sweetEmpireCute2026'));if(d)s={...defaults,...d,owned:d.owned||{},prices:d.prices||{},pets:d.pets||[]}}catch(e){}render()}
+document.getElementById('save').addEventListener('click',()=>save(true));
+document.getElementById('reset').addEventListener('click',()=>{if(confirm('Vrei să ștergi tot progresul și să începi de la zero?')){localStorage.removeItem('sweetEmpireCute2026');s={...defaults,owned:{},prices:{},pets:[]};render();document.getElementById('status').textContent='Ai început un imperiu nou!'}})
+setInterval(()=>{if(s.cps>0)add(s.cps/10);},100);
+setInterval(()=>save(false),5000);
+load();
+</script>
+</body>
+</html>
